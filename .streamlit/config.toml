@@ -1,0 +1,9 @@
+[server]
+# Streamlit's source watcher walks every imported module. `transformers` pulls in
+# hundreds of optional image processors, each raising a noisy ImportError for
+# torchvision (which this project does not need). Disabling the watcher removes
+# that flood and speeds up start-up. Restart the app to pick up code edits.
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false

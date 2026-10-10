@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atliq ContractLens</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1f2937; --muted: #5b6778; --line: #e3e7ed;
+    --navy: #14233c; --accent: #e24b3b; --blocker: #b42318; --high: #d9480f; --medium: #b45309;
+    --low: #a16207; --info: #64748b; --ok: #15803d; --warnbg: #fff8e6; --errbg: #fdeceb; --infobg: #eef4ff;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
+  .shell { display: grid; grid-template-columns: 250px 1fr; min-height: 100vh; }
+  aside { background: var(--navy); color: #dbe3ef; padding: 22px 18px; }
+  aside h1 { font-size: 19px; margin: 0 0 4px; color: #fff; }
+  aside p { font-size: 13px; color: #aab6c8; margin: 0 0 18px; }
+  aside label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #aab6c8; }
+  aside select { width: 100%; margin: 6px 0 18px; padding: 8px; border-radius: 6px; border: 0; font: inherit; }
+  nav button { display: block; width: 100%; text-align: left; background: none; border: 0; color: #dbe3ef;
+    padding: 8px 10px; border-radius: 6px; font: inherit; cursor: pointer; }
+  nav button.on { background: rgba(255,255,255,.12); color: #fff; font-weight: 600; }
+  nav button[hidden] { display: none; }
+  .meta { margin-top: 22px; font-size: 12px; color: #aab6c8; }
+  main { padding: 28px 34px; max-width: 1150px; }
+  h2 { margin: 0 0 4px; color: var(--navy); }
+  .sub { color: var(--muted); margin: 0 0 18px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 14px; }
+  th { background: #f0f2f6; font-weight: 600; }
+  tr.click { cursor: pointer; } tr.click:hover { background: #f8fafc; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 10px 0; }
+  .banner { border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+  .b-err { background: var(--errbg); color: #8a1c13; } .b-warn { background: var(--warnbg); color: #7a4b00; }
+  .b-info { background: var(--infobg); color: #1d3f8a; } .b-ok { background: #ecfdf3; color: #14532d; }
+  .sev { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 10px; color: #fff; }
+  .sev-blocker { background: var(--blocker); } .sev-high { background: var(--high); } .sev-medium { background: var(--medium); }
+  .sev-low { background: var(--low); } .sev-info { background: var(--info); }
+  blockquote { margin: 8px 0; padding: 6px 12px; border-left: 3px solid var(--line); color: #374151; background: #fafbfc; }
+  .small { font-size: 13px; color: var(--muted); }
+  button.btn { background: var(--accent); color: #fff; border: 0; padding: 8px 14px; border-radius: 6px; font: inherit; cursor: pointer; }
+  button.btn.alt { background: #fff; color: var(--navy); border: 1px solid var(--line); }
+  button.btn:disabled { opacity: .45; cursor: not-allowed; }
+  input[type=text], select.in, textarea { padding: 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 8px 0; }
+  details summary { cursor: pointer; font-weight: 600; }
+  .steps { font: 12px/1.6 ui-monospace, Menlo, Consolas, monospace; color: var(--muted); white-space: pre-wrap; }
+  .chat .q { font-weight: 600; margin-top: 14px; } .chat .a { white-space: pre-wrap; }
+  .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid #cbd5e1; border-top-color: var(--accent);
+    border-radius: 50%; animation: s 1s linear infinite; vertical-align: -2px; margin-right: 6px; }
+  @keyframes s { to { transform: rotate(360deg); } }
+  @media (max-width: 760px) { .shell { grid-template-columns: 1fr; } main { padding: 18px 16px; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <h1>📑 Atliq ContractLens</h1>
+    <p>Contract review assistant for AtliQ. It flags and cites; Karandeep decides and signs.</p>
+    <label for="who">I am</label>
+    <select id="who"></select>
+    <nav id="nav">
+      <button data-page="queue">Review queue</button>
+      <button data-page="review">Review a contract</button>
+      <button data-page="register" data-ceo>Obligations register</button>
+      <button data-page="ask">Ask the contracts</button>
+      <button data-page="portfolio" data-ceo>Signed portfolio check</button>
+      <button data-page="audit" data-ceo>Audit log</button>
+    </nav>
+    <div class="meta" id="meta"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const SESSION = store.get("cl-session", null) || (() => { const s = Math.random().toString(36).slice(2, 14); store.set("cl-session", s); return s; })();
+let META = null, WHO = store.get("cl-who", "Karandeep"), PAGE = store.get("cl-page", "queue");
+let CHAT = [], PROPOSALS = null, PICK = null;
+
+async function api(path, body) {
+  const opt = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+  const r = await fetch(path, opt);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.detail || `Request failed (${r.status})`);
+  return data;
+}
+const recKey = k => `cl-rec-${WHO}-${k}`;
+const isCeo = () => WHO === "Karandeep";
+const sev = s => `<span class="sev sev-${s}">${esc(s.toUpperCase())}</span>`;
+const loading = msg => `<div class="card"><span class="spin"></span>${esc(msg)}</div>`;
+const fail = e => `<div class="banner b-err">${esc(e.message || e)}</div>`;
+
+// ------------------------------------------------------------------ shell
+async function boot() {
+  META = await api("/api/meta");
+  $("#who").innerHTML = Object.entries(META.people).map(([n, r]) => `<option value="${n}">${n} (${r})</option>`).join("");
+  if (!META.people[WHO]) WHO = "Karandeep";
+  $("#who").value = WHO;
+  $("#who").onchange = () => { WHO = $("#who").value; store.set("cl-who", WHO); CHAT = []; PROPOSALS = null; render(); };
+  $("#nav").onclick = e => { const b = e.target.closest("button"); if (b) { PAGE = b.dataset.page; store.set("cl-page", PAGE); render(); } };
+  $("#meta").innerHTML = `Today (dataset): ${esc(META.today)}<br>` +
+    (META.has_key ? `Model: ${esc(META.model)}` : "⚠️ No GROQ_API_KEY: rule and register checks still run, AI steps are skipped.") +
+    `<br>Search: ${esc(META.search)}`;
+  render();
+}
+function render() {
+  document.querySelectorAll("#nav button").forEach(b => { b.hidden = b.hasAttribute("data-ceo") && !isCeo(); b.classList.toggle("on", b.dataset.page === PAGE); });
+  if (!isCeo() && ["register", "portfolio", "audit"].includes(PAGE)) PAGE = "queue";
+  ({ queue: pageQueue, review: pageReview, register: pageRegister, ask: pageAsk, portfolio: pagePortfolio, audit: pageAudit })[PAGE]();
+}
+
+// ------------------------------------------------------------------ queue
+async function pageQueue() {
+  const m = $("#main");
+  m.innerHTML = `<h2>Review queue</h2><p class="sub">Incoming drafts from the tracker, most urgent first. Deadlines come from the tracker's notes column.</p>` + loading("Loading the queue…");
+  try {
+    const rows = await api(`/api/queue?who=${encodeURIComponent(WHO)}`);
+    if (!rows.length) { m.innerHTML = m.innerHTML.replace(/<div class="card">.*$/s, "") + `<div class="banner b-info">No drafts requested by you in the queue.</div>`; return; }
+    let total = 0;
+    const body = rows.map(r => {
+      total += Number(r.value_usd || 0);
+      const rec = store.get(recKey(r.key), null), b = rec && rec.brief;
+      const status = rec ? (rec.completed ? "✅ complete" : esc(b.verdict)) : "not reviewed";
+      const due = r.deadline ? new Date(r.deadline + "T00:00").toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : "none recorded";
+      return `<tr class="click" data-key="${esc(r.key)}"><td>${esc(r.key)}</td><td>${esc(r.counterparty)}</td><td>${esc(r.doc_type)}</td>
+        <td>${esc(r.requested_by)}</td><td>${due}</td><td>${r.days_left ?? ""}</td><td>${r.value_usd ? "$" + Number(r.value_usd).toLocaleString() : ""}</td>
+        <td>${status}</td><td>${b ? b.counts.blocker : ""}</td><td>${b ? b.counts.high : ""}</td></tr>`;
+    }).join("");
+    m.innerHTML = `<h2>Review queue</h2><p class="sub">Incoming drafts from the tracker, most urgent first. Deadlines come from the tracker's notes column. Click a row to review it.</p>
+      <table><tr><th>ID</th><th>Counterparty</th><th>Type</th><th>Requested by</th><th>Deadline</th><th>Days left</th><th>Value</th><th>Review</th><th>Blockers</th><th>High</th></tr>${body}</table>
+      <p class="small">${rows.length} drafts, about $${total.toLocaleString()} of deal value waiting on review.</p>`;
+    m.querySelectorAll("tr.click").forEach(tr => tr.onclick = () => { PICK = tr.dataset.key; PAGE = "review"; store.set("cl-page", PAGE); render(); });
+  } catch (e) { m.innerHTML += fail(e); }
+}
+
+// ------------------------------------------------------------------ review
+async function pageReview() {
+  const m = $("#main");
+  m.innerHTML = `<h2>Review a contract</h2><p class="sub">Personal-data gate → extract → entity/law, deal documents, register → retrieve → clause scan ∥ conflict check → citation check → brief</p>` + loading("Loading…");
+  let rows;
+  try { rows = await api(`/api/queue?who=${encodeURIComponent(WHO)}`); } catch (e) { m.innerHTML += fail(e); return; }
+  PICK = PICK && rows.some(r => r.key === PICK) ? PICK : (rows[0] && rows[0].key);
+  const opts = rows.map(r => `<option value="${esc(r.key)}" ${r.key === PICK ? "selected" : ""}>${esc(r.key)} · ${esc(r.title)}</option>`).join("");
+  m.innerHTML = `<h2>Review a contract</h2><p class="sub">Personal-data gate → extract → entity/law, deal documents, register → retrieve → clause scan ∥ conflict check → citation check → brief</p>
+    <div class="row"><label><input type="radio" name="mode" value="queue" checked> From the queue</label>
+      <label><input type="radio" name="mode" value="upload"> Upload a file (.md / .txt)</label></div>
+    <div id="fromq" class="card">${rows.length ? `<div class="row"><select class="in" id="pick" style="min-width:420px">${opts}</select>
+      <button class="btn" id="run">Run review</button></div><div class="small" id="note"></div>` : "No drafts requested by you."}</div>
+    <div id="fromu" class="card" hidden>
+      <div class="row"><input type="file" id="file" accept=".md,.txt"></div>
+      <div class="row"><input type="text" id="cp" placeholder="Counterparty"><input type="text" id="cc" value="India" placeholder="Counterparty country">
+        <select class="in" id="dt">${META.doc_types.map(t => `<option>${esc(t)}</option>`).join("")}</select>
+        <button class="btn" id="runu">Run review</button></div>
+      <div class="small">Tip: try data/demo/harrington_sample_extract.txt to see the personal-data gate.</div></div>
+    <div id="out"></div>`;
+  m.querySelectorAll("input[name=mode]").forEach(r => r.onchange = () => { $("#fromq").hidden = r.value !== "queue" && r.checked; $("#fromu").hidden = !(r.value === "upload" && r.checked); });
+  const showSaved = () => {
+    const r = rows.find(x => x.key === PICK);
+    if ($("#note") && r) $("#note").textContent = `Requested by ${r.requested_by} · tracker note: ${r.notes || "—"}`;
+    const rec = store.get(recKey(PICK), null);
+    $("#out").innerHTML = rec ? "" : `<p class="small">Not reviewed yet.</p>`;
+    if (rec) showBrief(rec);
+  };
+  if (rows.length) {
+    $("#pick").onchange = () => { PICK = $("#pick").value; showSaved(); };
+    $("#run").onclick = () => run({ key: PICK });
+    showSaved();
+  }
+  $("#runu").onclick = async () => {
+    const f = $("#file").files[0];
+    if (!f) { $("#out").innerHTML = fail("Choose a .md or .txt file first."); return; }
+    run({ text: await f.text(), filename: f.name, counterparty: $("#cp").value, client_country: $("#cc").value, doc_type: $("#dt").value });
+  };
+}
+async function run(payload) {
+  const out = $("#out");
+  out.innerHTML = loading("Reviewing… rules and register first, then the AI clause scan. This can take up to a minute.");
+  document.querySelectorAll("#run,#runu").forEach(b => b.disabled = true);
+  try {
+    const res = await api("/api/review", { who: WHO, session_id: SESSION, ...payload });
+    const steps = `<details class="card"><summary>Steps</summary><div class="steps">${esc((res.steps || []).join("\n"))}</div></details>`;
+    if (res.status === "blocked_personal_data") {
+      out.innerHTML = `<div class="banner b-err"><b>Stopped: personal data found</b> (${esc(res.pii.join(", "))}). It was NOT sent to any model. Remove it and use the secure channel agreed with the client.</div>` + steps;
+      return;
+    }
+    store.set(recKey(res.record.key), res.record);
+    showBrief(res.record, steps);
+  } catch (e) { out.innerHTML = fail(e); }
+  finally { document.querySelectorAll("#run,#runu").forEach(b => b.disabled = false); }
+}
+function showBrief(rec, extra = "") {
+  const b = rec.brief, c = b.counts, out = $("#out");
+  const cls = c.blocker ? "b-err" : c.high ? "b-warn" : "b-info";
+  let h = `<p class="small">Last run by ${esc(rec.run_by)} at ${esc(rec.run_at)} UTC</p>
+    <div class="banner ${cls}"><b>${esc(b.verdict)}</b> · ${c.blocker} blocker · ${c.high} high · ${c.medium} medium · ${c.low} low · ${c.info} info</div>`;
+  if (!b.ai_completed) h += `<div class="banner b-warn"><b>AI review not completed.</b> Rule and register checks below are complete; the AI clause scan did not run, so no clause is shown as checked by it. ${(b.errors || []).map(e => `<br><span class="small">• ${esc(e)}</span>`).join("")}</div>`;
+  if (b.dropped_count) h += `<p class="small">Citation check removed ${b.dropped_count} AI finding(s) whose quote was not in the contract.</p>`;
+  if (b.recommend_counsel && isCeo()) h += `<div class="banner b-info">Recommend outside counsel before signing (blocker on a restriction, patient data or liability).</div>`;
+  if (b.bundle && b.bundle.items && b.bundle.items.length)
+    h += `<h3>Deal documents: ${esc(b.bundle.type)}</h3><table><tr><th>Document</th><th>Status</th><th>Tracker / note</th></tr>${b.bundle.items.map(i =>
+      `<tr><td>${esc(i.doc)}</td><td>${i.status === "Missing" ? "<b style='color:var(--blocker)'>Missing</b>" : esc(i.status)}</td><td>${esc(i.tracker_id)}</td></tr>`).join("")}</table>`;
+  h += `<h3>Flags</h3>` + b.findings.map(f => finding(f, rec)).join("");
+  if (b.not_checked) h += `<details class="card"><summary>What this review could not check</summary><p>Signed contracts listed in the tracker but with no file in the dataset, so they are NOT in the obligations register:</p><ul>${b.not_checked.map(x => `<li>${esc(x)}</li>`).join("")}</ul><p>Also not checked: whether the scope matches the proposal (no proposals in the dataset).</p></details>`;
+  if (isCeo()) {
+    const open = b.findings.filter(f => ["blocker", "high"].includes(f.severity) && !rec.decisions[f.id]).map(f => f.id);
+    h += rec.completed ? `<div class="banner b-ok">Review marked complete by ${esc(rec.completed.by)}. Signing stays with Karandeep, outside this tool.</div>`
+      : `<div class="row"><button class="btn" id="complete" ${open.length ? "disabled" : ""}>Mark review complete</button>${open.length ? `<span class="small">Decide these before completing: ${esc(open.join(", "))}</span>` : ""}</div>`;
+  }
+  out.innerHTML = h + extra;
+  out.querySelectorAll("[data-act]").forEach(btn => btn.onclick = () => decide(rec, btn.dataset.id, btn.dataset.act));
+  const cb = $("#complete"); if (cb) cb.onclick = async () => {
+    try { const r = await api("/api/complete", { who: WHO, session_id: SESSION, record: rec }); store.set(recKey(r.key), r); showBrief(r); }
+    catch (e) { out.insertAdjacentHTML("afterbegin", fail(e)); }
+  };
+}
+function finding(f, rec) {
+  const open = ["blocker", "high"].includes(f.severity) ? "open" : "";
+  let h = `<details class="card" ${open}><summary>${esc(f.id)} · ${sev(f.severity)} ${esc(f.title)}</summary>`;
+  const src = f.source_id && f.source_id !== "draft" ? `signed: ${f.source_id}` : "this draft";
+  if (f.quote) h += `<blockquote>${esc(f.quote)}</blockquote><div class="small">Source: ${esc(src)}${f.clause ? " §" + esc(f.clause) : ""} · quote checked word for word</div>`;
+  if (f.draft_quote) h += `<p><b>In this draft:</b></p><blockquote>${esc(f.draft_quote)}</blockquote>`;
+  (f.evidence || []).forEach(ev => h += `<p><b>Also:</b></p><blockquote>${esc(ev.quote)}</blockquote><div class="small">Source: ${esc(ev.source)}</div>`);
+  if (f.why) h += `<p>${esc(f.why)}</p>`;
+  if (f.assessment && f.origin === "register") h += `<div class="small">AI assessment: ${esc(f.assessment)} (the flag stays until a person decides)</div>`;
+  if (f.ask_for) h += `<p><b>Ask for / do:</b> ${esc(f.ask_for)}</p>`;
+  if (f.standard) h += `<div class="small">AtliQ standard: ${esc(f.standard)}</div>`;
+  (f.precedent || []).forEach(p => h += `<div class="small">Past negotiation (${esc(p.cite)}): ${esc(p.text)}</div>`);
+  h += `<div class="small">Found by: ${f.origin === "rule" ? "rules" : f.origin === "register" ? "register check" : "AI clause scan, citation-checked"}</div>`;
+  const dec = rec.decisions[f.id];
+  if (dec) h += `<div class="banner b-ok">${esc({accept: "Accepted", dismiss: "Dismissed", counsel: "Sent to outside counsel"}[dec.action])} by ${esc(dec.by)}${dec.reason ? ": " + esc(dec.reason) : ""}</div>`;
+  if (isCeo()) h += `<div class="row"><button class="btn alt" data-act="accept" data-id="${esc(f.id)}">Accept</button>
+    <button class="btn alt" data-act="counsel" data-id="${esc(f.id)}">Send to counsel</button>
+    <input type="text" id="reason-${esc(f.id)}" placeholder="Reason (needed to dismiss)" style="flex:1;min-width:200px">
+    <button class="btn alt" data-act="dismiss" data-id="${esc(f.id)}">Dismiss</button></div>`;
+  return h + `</details>`;
+}
+async function decide(rec, id, action) {
+  const reason = ($(`#reason-${CSS.escape(id)}`) || {}).value || "";
+  try {
+    const r = await api("/api/decide", { who: WHO, session_id: SESSION, record: rec, finding_id: id, action, reason });
+    store.set(recKey(r.key), r); showBrief(r);
+  } catch (e) { alert(e.message); }
+}
+
+// ------------------------------------------------------------------ register
+async function pageRegister() {
+  const m = $("#main");
+  m.innerHTML = `<h2>Obligations register</h2><p class="sub">What AtliQ has already promised. Every entry quotes its signed contract; quotes are checked word for word at start-up. Nobody at AtliQ had this list before.</p>` + loading("Loading…");
+  try {
+    const d = await api(`/api/register?who=${encodeURIComponent(WHO)}`);
+    let h = `<h2>Obligations register</h2><p class="sub">What AtliQ has already promised. Every entry quotes its signed contract; quotes are checked word for word at start-up. Nobody at AtliQ had this list before.</p>
+      <table><tr><th>ID</th><th>Type</th><th>What</th><th>Binds</th><th>Until</th><th>Status</th><th>Quotes verified</th></tr>${d.entries.map(e =>
+      `<tr><td>${esc(e.id)}</td><td>${esc(e.type)}</td><td>${esc(e.title)}</td><td>${esc(e.bound)}</td><td>${esc(e.active_until || "no end date")}</td><td>${esc(e.status)}</td><td>${e.verified ? "✅" : "❌"}</td></tr>`).join("")}</table>`;
+    h += d.entries.map(e => `<details class="card"><summary>${esc(e.id)} · ${esc(e.title)}</summary>${e.quotes.map(q => `<blockquote>${esc(q)}</blockquote>`).join("")}
+      <div class="small">Source: ${esc(e.source)} §${esc(e.clause)} · scope: ${esc(e.scope)}</div>${e.until_note ? `<div class="small">${esc(e.until_note)}</div>` : ""}
+      ${e.action ? `<p><b>If a draft hits this:</b> ${esc(e.action)}</p>` : ""}</details>`).join("");
+    h += `<h3>Add entries from a signed contract</h3><p class="small">The model proposes; only quotes found word for word are shown; nothing counts until you confirm.</p>
+      <div class="row"><select class="in" id="sdoc">${d.signed.map(s => `<option value="${esc(s.doc_id)}">${esc(s.title)} · ${esc(s.doc_id)}</option>`).join("")}</select>
+      <button class="btn" id="prop">Propose entries</button></div><div id="props"></div>`;
+    m.innerHTML = h;
+    $("#prop").onclick = async () => {
+      const doc = $("#sdoc").value; $("#props").innerHTML = loading("Asking the model…");
+      try { PROPOSALS = { doc, ...(await api("/api/register/propose", { who: WHO, doc_id: doc })) }; showProps(); }
+      catch (e) { $("#props").innerHTML = fail(e); }
+    };
+  } catch (e) { m.innerHTML += fail(e); }
+}
+function showProps() {
+  const p = PROPOSALS;
+  $("#props").innerHTML = `<p class="small">${p.items.length} proposals with verified quotes, ${p.dropped} dropped.</p>` + p.items.map((it, i) =>
+    `<div class="card"><b>${esc(it.type)}: ${esc(it.title)}</b> (§${esc(it.clause)})<blockquote>${esc(it.quote)}</blockquote>
+     <div class="row"><input type="text" id="kw${i}" placeholder="Flag drafts that mention (comma-separated keywords)" style="flex:1">
+     <button class="btn alt" data-i="${i}">Confirm into register</button></div></div>`).join("");
+  $("#props").querySelectorAll("button[data-i]").forEach(b => b.onclick = async () => {
+    const i = +b.dataset.i;
+    try { await api("/api/register/confirm", { who: WHO, doc_id: p.doc, item: p.items[i], keywords: $("#kw" + i).value, n: i + 1 });
+      b.replaceWith(Object.assign(document.createElement("span"), { textContent: "Added. It counts in reviews on this server." })); }
+    catch (e) { alert(e.message); }
+  });
+}
+
+// ------------------------------------------------------------------ ask
+function pageAsk() {
+  const samples = isCeo() ? ["What have we promised Al Noor, and until when?", "Which signed contracts restrict who we can work with?",
+    "What did we agree on liquidated damages with Acme and Trustline?", "What does the intercompany BAA allow the Pune team to do?"]
+    : ["What is still missing for my deals?", "What does my client's draft say about payment terms?"];
+  $("#main").innerHTML = `<h2>Ask the contracts</h2><p class="sub">Answers come only from the signed contracts, drafts and notes, with numbered sources. It will not sign, approve, send, or give legal opinions.</p>
+    <div class="row">${samples.map(s => `<button class="btn alt sample">${esc(s)}</button>`).join("")}</div>
+    <div class="chat" id="chat"></div>
+    <div class="row"><input type="text" id="q" placeholder="Ask about any contract or past negotiation" style="flex:1"><button class="btn" id="send">Ask</button></div>`;
+  const draw = () => $("#chat").innerHTML = CHAT.map(m => m.role === "user" ? `<div class="q">${esc(m.content)}</div>`
+    : `<div class="card"><div class="a">${esc(m.content)}</div>${m.bad && m.bad.length ? `<div class="banner b-warn">The answer cites source(s) ${esc(m.bad.join(", "))} that were not retrieved; treat those parts as unsupported.</div>` : ""}
+       ${m.sources && m.sources.length ? `<details><summary>Sources</summary>${m.sources.map(s => `<p><b>[${s.n}] ${esc(s.cite)}</b><br><span class="small">${esc(s.excerpt.slice(0, 600))}</span></p>`).join("")}</details>` : ""}</div>`).join("");
+  const ask = async q => {
+    if (!q.trim()) return;
+    const history = CHAT.map(({ role, content }) => ({ role, content }));
+    CHAT.push({ role: "user", content: q }); draw(); $("#chat").insertAdjacentHTML("beforeend", loading("Thinking…")); $("#q").value = "";
+    try { const r = await api("/api/ask", { who: WHO, question: q, history }); CHAT.push({ role: "assistant", content: r.text, sources: r.sources, bad: r.bad }); }
+    catch (e) { CHAT.push({ role: "assistant", content: "Couldn't answer: " + e.message }); }
+    draw();
+  };
+  document.querySelectorAll(".sample").forEach(b => b.onclick = () => ask(b.textContent));
+  $("#send").onclick = () => ask($("#q").value);
+  $("#q").onkeydown = e => { if (e.key === "Enter") ask($("#q").value); };
+  draw();
+}
+
+// ------------------------------------------------------------------ portfolio & audit
+async function pagePortfolio() {
+  const m = $("#main");
+  m.innerHTML = `<h2>Signed portfolio check</h2><p class="sub">The same entity and governing-law rules, run over everything already signed.</p>` + loading("Checking…");
+  try {
+    const d = await api(`/api/portfolio?who=${encodeURIComponent(WHO)}`);
+    m.innerHTML = `<h2>Signed portfolio check</h2><p class="sub">The same entity and governing-law rules, run over everything already signed.</p>
+      <table><tr><th>Contract</th><th>Severity</th><th>Flag</th><th>Clause</th><th>Why</th></tr>${d.flags.map(r =>
+      `<tr><td>${esc(r.contract)}</td><td>${sev(r.severity)}</td><td>${esc(r.title)}</td><td>${esc((r.quote || "").slice(0, 140))}</td><td>${esc((r.why || "").slice(0, 160))}</td></tr>`).join("")}</table>
+      <h3>Signed, but no file in the dataset</h3><ul>${d.no_file.map(r => `<li>${esc(r.contract_id)} ${esc(r.counterparty)} (${esc(r.doc_type)}), stored: ${esc(r.file_location)}</li>`).join("")}</ul>`;
+  } catch (e) { m.innerHTML += fail(e); }
+}
+async function pageAudit() {
+  const m = $("#main");
+  m.innerHTML = `<h2>Audit log</h2><p class="sub">Every step and decision, with IDs and counts only. No contract text is logged.${META.on_vercel ? " On Vercel this shows the log of the server that answered; it resets when that server restarts." : ""}</p>` + loading("Loading…");
+  try {
+    const rows = await api(`/api/audit?who=${encodeURIComponent(WHO)}`);
+    m.innerHTML = m.innerHTML.replace(/<div class="card">.*$/s, "") + (rows.length ? `<table><tr><th>Time (UTC)</th><th>Session</th><th>Contract</th><th>Stage</th><th>Detail</th></tr>${rows.map(r =>
+      `<tr><td>${esc(r.timestamp.slice(0, 19).replace("T", " "))}</td><td>${esc(r.session_id)}</td><td>${esc(r.contract_id)}</td><td>${esc(r.stage)}</td><td>${esc(r.detail)}</td></tr>`).join("")}</table>`
+      : `<div class="banner b-info">Nothing logged yet.</div>`);
+  } catch (e) { m.innerHTML += fail(e); }
+}
+
+boot().catch(e => { $("#main").innerHTML = fail(e); });
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Everything for running on your laptop: the Vercel set plus the Streamlit screen, local
+# embeddings and Chroma (same as the RAG chatbot), and a local server for the web version.
+#   pip install -r requirements-local.txt
+-r requirements.txt
+
+# --- Vector store & local embeddings --------------------------------------------
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-chroma>=0.2.0
+langchain-huggingface>=0.1.0
+langchain-text-splitters>=0.3.0
+chromadb>=0.5.0
+sentence-transformers>=3.0.0
+# scipy 1.18.x ships an interpolate DLL that Windows Application Control blocks,
+# which breaks the scikit-learn import inside sentence-transformers.
+scipy<1.18
+
+# --- Streamlit screen -------------------------------------------------------------------------
+streamlit>=1.36.0
+pandas>=2.0.0
+
+# --- Run the Vercel web version on your laptop: uvicorn api.index:app --reload ----------------
+uvicorn>=0.29.0

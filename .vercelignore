@@ -1,0 +1,10 @@
+.venv
+.env
+chroma_store
+logs
+reviews
+__pycache__
+*.pyc
+# laptop-only entry points (Streamlit screen and CLI); Vercel runs api/index.py
+app.py
+main.py

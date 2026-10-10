@@ -1,0 +1,13 @@
+# Used by Vercel and by everything else. Kept small so it fits a Vercel Python function:
+# no local embedding model here (see requirements-local.txt).
+
+# --- LLM + review workflow (same LangChain + Groq stack as the RAG chatbot) -------------
+langchain-core>=0.3.0
+langchain-groq>=0.2.0
+langgraph>=0.2.0
+
+# --- Web API for the Vercel deployment ----------------------------------------------------
+fastapi>=0.110.0
+
+# --- Config -----------------------------------------------------------------------------------
+python-dotenv>=1.0.0

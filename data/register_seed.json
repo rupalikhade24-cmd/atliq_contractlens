@@ -1,0 +1,302 @@
+{
+  "_note": "Obligations register: what AtliQ has already promised in signed contracts. Every quote is checked word-for-word against its source file when the app starts; an entry whose quote is not found is shown as unverified and not used. 'triggers' drive the recall-first collision check (a draft is flagged if every group has at least one match).",
+  "entries": [
+    {
+      "id": "R-01",
+      "type": "Non-compete",
+      "title": "Al Noor: no analytics/AI/revenue-management work for any hospitality business in the GCC",
+      "source": "2025-03-15_al_noor_hospitality_msa",
+      "clause": "12.1, 12.2, 12.3, 1.14",
+      "bound": "AtliQ Technologies Pvt Ltd and all its Affiliates, including AtliQ Inc (12.1, 12.3)",
+      "scope": "Hospitality businesses headquartered in the GCC, or any work relating to properties in the GCC, wherever performed",
+      "active_from": "2025-03-15",
+      "active_until": "2029-09-14",
+      "until_note": "Term ends 14 Mar 2028 + 18-month Restricted Period",
+      "quotes": [
+        "the Supplier undertakes that neither it nor any of its Affiliates shall, during the Restricted Period, directly or indirectly, provide data analytics, artificial intelligence or revenue-management services to any Hospitality Business in the GCC.",
+        "services are provided \"in the GCC\" if the Hospitality Business receiving them is headquartered in, or the services relate to properties or operations located in, any state of the GCC, irrespective of where the services are performed.",
+        "\"Restricted Period\" means the Term and the period of eighteen (18) months following the expiry or termination of this Agreement."
+      ],
+      "severity": "blocker",
+      "severity_if_indirect": "high",
+      "triggers": {
+        "all_groups": [
+          [
+            "hotels?",
+            "resorts?",
+            "hospitality",
+            "serviced apartments?",
+            "guest analytics"
+          ],
+          [
+            "GCC",
+            "Gulf Cooperation Council",
+            "United Arab Emirates",
+            "UAE",
+            "Dubai",
+            "Abu Dhabi",
+            "Sharjah",
+            "Ras Al Khaimah",
+            "Saudi",
+            "KSA",
+            "Riyadh",
+            "Jeddah",
+            "Oman",
+            "Muscat",
+            "Qatar",
+            "Doha",
+            "Kuwait",
+            "Bahrain"
+          ]
+        ],
+        "direct_if_counterparty_matches": [
+          "hotel",
+          "resort",
+          "hospitality"
+        ]
+      },
+      "related": [
+        "R-02"
+      ],
+      "action": "Ask Al Noor for a written waiver under clause 12.4 before signing, or take the GCC work out of scope. Send to counsel (Mehta Rao already has the Al Noor file)."
+    },
+    {
+      "id": "R-02",
+      "type": "Waiver",
+      "title": "Al Noor waiver: covers the Seaside Hotels (Muscat) SOW only",
+      "source": "2026-02-10_al_noor_waiver_letter",
+      "clause": "2, 3",
+      "bound": "AtliQ Technologies Pvt Ltd",
+      "scope": "Only the Feb 2026 Seaside Hotels demand-forecasting SOW; not follow-ons, other hotels or Affiliates",
+      "active_from": "2026-02-10",
+      "active_until": null,
+      "quotes": [
+        "This consent is strictly limited to the Seaside SOW.",
+        "any other Hospitality Business, whether in the Sultanate of Oman or elsewhere in the GCC; or (c) any Affiliate of the Supplier."
+      ],
+      "severity": "info",
+      "triggers": null,
+      "related": [
+        "R-01"
+      ],
+      "action": "Shown alongside R-01: the existing waiver does not extend to any new hospitality client."
+    },
+    {
+      "id": "R-03",
+      "type": "Most-favoured pricing (MFN)",
+      "title": "Crestline: no other customer may get lower rates for similar services; lower rates apply to Crestline retroactively",
+      "source": "2024-08-01_crestline_retail_msa",
+      "clause": "6.4, Exhibit B",
+      "bound": "AtliQ Inc and its Affiliates (incl. AtliQ Technologies Pvt Ltd)",
+      "scope": "Data engineering, BI and analytics resources; benchmark rates Senior Data Engineer $85, Data Engineer $62, BI Developer $58 per hour",
+      "active_from": "2024-08-01",
+      "active_until": "2027-07-31",
+      "quotes": [
+        "Supplier represents and warrants that the rates, fees and other commercial terms offered to Crestline under this Agreement are and shall remain no less favorable than those offered by Supplier or its Affiliates to any other customer for substantially similar services during the Term.",
+        "such lower rates shall apply to Crestline retroactively from the date they were first offered to such other customer."
+      ],
+      "severity": "blocker",
+      "triggers": {
+        "rates_below": {
+          "senior data engineer": 85,
+          "data engineer": 62,
+          "bi developer": 58
+        }
+      },
+      "related": [],
+      "action": "Keep the new rate card at or above Crestline's rates, or price the retroactive Crestline credit into the deal before agreeing."
+    },
+    {
+      "id": "R-04",
+      "type": "IP handed over",
+      "title": "Northwind: IP in PipeKit, as incorporated in Northwind's deliverables, was assigned to Northwind",
+      "source": "2025-06-20_northwind_logistics_msa",
+      "clause": "9.2, Schedule 1 S1.2",
+      "bound": "AtliQ Technologies Pvt Ltd",
+      "scope": "PipeKit (AtliQ's pipeline accelerator) and any pre-existing materials built into Northwind deliverables",
+      "active_from": "2025-06-20",
+      "active_until": null,
+      "quotes": [
+        "All Intellectual Property Rights in the Deliverables, including any software, tools, frameworks, libraries and pre-existing materials incorporated into the Deliverables, shall vest in the Client absolutely upon payment of the Charges for the relevant Milestone.",
+        "PipeKit will be configured and extended for the Client and incorporated into the delivered pipeline as its ingestion and orchestration layer."
+      ],
+      "severity": "blocker",
+      "triggers": {
+        "any": [
+          "PipeKit"
+        ]
+      },
+      "related": [],
+      "action": "Do not warrant sole ownership of PipeKit. Ask counsel whether the Northwind assignment covers the PipeKit core; check whether Northwind will license or re-assign it."
+    },
+    {
+      "id": "R-05",
+      "type": "Exclusivity",
+      "title": "CloudSpan: no implementation/reseller/referral partnership with a competing data platform in India or the GCC",
+      "source": "2025-09-01_cloudspan_strategic_partnership_agreement",
+      "clause": "7.1, 7.2",
+      "bound": "AtliQ Technologies Pvt Ltd and its Affiliates",
+      "scope": "Partner appointments with any cloud data-warehouse, lakehouse or unified analytics platform, in India and the GCC",
+      "active_from": "2025-09-01",
+      "active_until": "2028-08-31",
+      "until_note": "Ends earlier if either side terminates on 90 days' notice (14.2)",
+      "quotes": [
+        "during the Term Partner and its Affiliates shall not act as an implementation, reseller or referral partner for any Competing Platform in India or the GCC.",
+        "\"Competing Platform\" means any cloud data-warehouse, lakehouse or unified analytics platform offered as a service."
+      ],
+      "severity": "blocker",
+      "triggers": {
+        "doc_types": [
+          "partner",
+          "referral",
+          "reseller"
+        ],
+        "all_groups": [
+          [
+            "lakehouse",
+            "data[- ]warehouse",
+            "unified analytics platform"
+          ],
+          [
+            "India",
+            "GCC",
+            "Gulf Cooperation Council",
+            "United Arab Emirates",
+            "UAE",
+            "Saudi",
+            "Middle East"
+          ]
+        ]
+      },
+      "related": [],
+      "action": "Limit the new partnership to territories outside India and the GCC (e.g. Europe), or end CloudSpan first on 90 days' notice."
+    },
+    {
+      "id": "R-06",
+      "type": "Non-compete (expired)",
+      "title": "Orbit Travels: no travel-booking software for online travel agencies in India (expired 30 Jun 2025)",
+      "source": "2022-07-01_orbit_travels_msa_scanned",
+      "clause": "6.1",
+      "bound": "AtliQ Technologies Pvt Ltd",
+      "scope": "Travel-booking software for online travel agencies operating in India",
+      "active_from": "2022-07-01",
+      "active_until": "2025-06-30",
+      "quotes": [
+        "it shall not develop, license or provide travel-booking software to any online travel agency operating in India."
+      ],
+      "severity": "info",
+      "triggers": {
+        "all_groups": [
+          [
+            "travel[- ]booking",
+            "online travel agenc(y|ies)",
+            "OTA"
+          ],
+          [
+            "India"
+          ]
+        ]
+      },
+      "related": [],
+      "action": "Expired; shown so nobody has to dig the scan out again."
+    },
+    {
+      "id": "R-07",
+      "type": "Patient data received before a BAA",
+      "title": "Harrington NDA excludes patient data until a BAA is signed, but a real patient extract was already sent and forwarded to Pune",
+      "source": "2026-08-20_harrington_health_mutual_nda",
+      "clause": "2.3 (and Harrington huddle notes, 27 Sep)",
+      "bound": "AtliQ Inc",
+      "scope": "All Harrington Protected Health Information",
+      "active_from": "2026-08-20",
+      "active_until": "2028-08-20",
+      "quotes": [
+        "Protected Health Information, as defined at 45 C.F.R. § 160.103, is excluded from this Agreement and shall be disclosed only after execution of a Business Associate Agreement between the Parties."
+      ],
+      "evidence": [
+        {
+          "source": "2026-09-27_harrington_huddle",
+          "quote": "It's real data I think — names, DOBs, some diagnosis codes."
+        }
+      ],
+      "severity": "blocker",
+      "triggers": {
+        "deal": [
+          "Harrington"
+        ]
+      },
+      "related": [
+        "R-08"
+      ],
+      "action": "Stop: have the Pune engineers stop using and delete the extract, tell Harrington, and get counsel (Calloway Stern handled CareBridge). Do not wait for the MSA."
+    },
+    {
+      "id": "R-08",
+      "type": "Scope limit",
+      "title": "Intercompany subcontractor BAA (Inc to Pvt Ltd) covers the CareBridge engagement only",
+      "source": "2025-10-06_atliq_intercompany_subcontractor_baa",
+      "clause": "1.2, 3.1, Schedule 1",
+      "bound": "AtliQ Inc and AtliQ Technologies Pvt Ltd",
+      "scope": "Pune may touch de-identified CareBridge data only; any other US healthcare client needs its own subcontractor BAA",
+      "active_from": "2025-10-06",
+      "active_until": null,
+      "quotes": [
+        "\"Engagement\" means the CareBridge Engagement described in Schedule 1.",
+        "Subcontractor and its personnel shall access De-identified Data only. Subcontractor shall not access, receive, store, view or process PHI."
+      ],
+      "severity": "high",
+      "triggers": {
+        "all_groups": [
+          [
+            "Protected Health Information",
+            "PHI",
+            "HIPAA"
+          ]
+        ],
+        "not_counterparty": [
+          "CareBridge"
+        ]
+      },
+      "related": [
+        "R-07"
+      ],
+      "action": "Draft a subcontractor BAA for this engagement (and one for each US freelancer) before anyone outside the client's US environment touches the data."
+    },
+    {
+      "id": "R-09",
+      "type": "IP not owned",
+      "title": "Rohan Iyer (freelancer) kept the IP in his Acme dashboards; AtliQ only has a licence",
+      "source": "2025-04-28_rohan_iyer_contractor_agreement",
+      "clause": "5.2, 5.3",
+      "bound": "AtliQ Technologies Pvt Ltd",
+      "scope": "Work product Rohan created for the Acme Retail dashboards (Apr to Jul 2025)",
+      "active_from": "2025-04-28",
+      "active_until": null,
+      "quotes": [
+        "The Contractor retains ownership of all intellectual property rights in the Work Product and in any pre-existing materials, components and templates of the Contractor."
+      ],
+      "severity": "medium",
+      "triggers": null,
+      "related": [],
+      "action": "Check what the Acme MSA promised Acme about ownership of those dashboards; future freelancer agreements should assign bespoke work product."
+    },
+    {
+      "id": "R-10",
+      "type": "No-hire",
+      "title": "Meridian: no hiring or engaging Meridian staff or consultants for 24 months after the NDA",
+      "source": "2026-07-16_meridian_healthcare_nda",
+      "clause": "7.3",
+      "bound": "AtliQ Technologies Pvt Ltd",
+      "scope": "Meridian employees and consultants AtliQ dealt with",
+      "active_from": "2026-07-16",
+      "active_until": null,
+      "quotes": [
+        "During the term of this Agreement and for a period of twenty-four (24) months thereafter, the Recipient shall not, directly or indirectly, solicit for employment or engagement, or employ or engage, any employee or consultant of Meridian"
+      ],
+      "severity": "low",
+      "triggers": null,
+      "related": [],
+      "action": "Check before hiring or engaging anyone who worked with Meridian."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+SYNTHETIC DEMO FILE - invented people, not real patient data.
+Added to the dataset to demo the personal-data gate: the meeting notes say Harrington's
+"sample extract" with names, DOBs and diagnosis codes was forwarded to Pune.
+
+From: Kevin Brooks <kbrooks@harrington-health.example>
+Subject: sample extract for pipeline sizing
+
+patient_name,dob,mrn,admit_date,dx_codes
+Jane Q. Example,DOB: 1961-04-12,MRN 00482913,2026-08-02,E11.9;I10;N18.3
+John R. Sample,DOB: 1975-11-30,MRN 00519344,2026-08-05,J44.1;I50.9
+Maria T. Placeholder,DOB: 1988-02-17,MRN 00533071,2026-08-07,O24.4;Z34.9
