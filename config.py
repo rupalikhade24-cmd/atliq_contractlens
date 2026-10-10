@@ -39,7 +39,7 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM
 # Two tiers (PRD section 5): a fast model for extraction, the main one for clause scan,
 # conflict reasoning and Q&A. Both default to the chatbot's model.
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "qwen/qwen3.6-27b")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 GROQ_MODEL_FAST = os.getenv("GROQ_MODEL_FAST", GROQ_MODEL)
 TEMPERATURE = 0  # deterministic, factual output
 REASONING_EFFORT = os.getenv("GROQ_REASONING_EFFORT", "none")
