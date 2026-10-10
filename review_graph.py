@@ -23,7 +23,7 @@ from langgraph.graph import END, START, StateGraph
 import config
 import register
 import rules
-from chain import call_json
+from chain import call_json, model_name
 from citations import find_quote
 from dataset import load_docs, load_tracker
 from workflow_log import Trace
@@ -331,7 +331,7 @@ def assemble(state: ReviewState) -> dict:
         "ai_completed": ai_done and _llm_ready(), "errors": state.get("errors", []),
         "dropped_count": len(state.get("dropped", [])), "recommend_counsel": counsel,
         "not_checked": not_checked(), "role": rules.atliq_role(tracker),
-        "model": config.GROQ_MODEL if _llm_ready() else "",
+        "model": model_name() if _llm_ready() else "",
     }
     step = _trace(state).add("Brief", f"{len(findings)} flags ({counts['blocker']} blocker, "
                                       f"{counts['high']} high), ai_completed={brief['ai_completed']}")

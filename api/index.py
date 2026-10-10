@@ -85,7 +85,11 @@ def home():
 
 @app.get("/api/meta")
 def meta():
-    return {"today": config.TODAY.isoformat(), "model": config.GROQ_MODEL if config.GROQ_API_KEY else "",
+    model, served = "", []
+    if config.GROQ_API_KEY:
+        from chain import available_models, model_name
+        model, served = model_name(), available_models()
+    return {"today": config.TODAY.isoformat(), "model": model, "models_for_this_key": served,
             "has_key": bool(config.GROQ_API_KEY), "people": PEOPLE, "doc_types": DOC_TYPES,
             "search": config.SEARCH_BACKEND, "on_vercel": config.ON_VERCEL}
 

@@ -13,22 +13,70 @@ import config
 from retriever import describe_sources, format_context, search
 
 
+# Tried in order when GROQ_MODEL isn't served to this key (Groq retires models and
+# organisations can switch models off, so the configured name can disappear).
+FALLBACK_MODELS = ["llama-3.3-70b-versatile", "openai/gpt-oss-120b", "qwen/qwen3.8-27b",
+                   "qwen/qwen3-32b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"]
+_NOT_CHAT = ("whisper", "orpheus", "guard", "safeguard", "tts", "playai", "compound")
+_resolved: dict[str, str] = {}
+
+
+def available_models() -> list[str]:
+    """Model ids this key can use (empty if Groq can't be reached)."""
+    try:
+        from groq import Groq
+        return sorted(m.id for m in Groq(api_key=config.GROQ_API_KEY).models.list().data)
+    except Exception:
+        return []
+
+
+def pick_model(wanted: str, served: list[str]) -> str:
+    """The configured model if served, else the first served fallback, else any chat model."""
+    if not served or wanted in served:
+        return wanted
+    for name in FALLBACK_MODELS:
+        if name in served:
+            return name
+    chat = [m for m in served if not any(x in m.lower() for x in _NOT_CHAT)]
+    return chat[0] if chat else wanted
+
+
+def model_name(fast: bool = False) -> str:
+    wanted = config.GROQ_MODEL_FAST if fast else config.GROQ_MODEL
+    if wanted not in _resolved:
+        _resolved[wanted] = pick_model(wanted, available_models())
+    return _resolved[wanted]
+
+
+def _reasoning_kwargs(model: str) -> dict:
+    """Only reasoning models accept reasoning_effort; Qwen takes none/default, gpt-oss low/medium/high."""
+    if model.startswith("qwen/"):
+        return {"reasoning_effort": config.REASONING_EFFORT}
+    if model.startswith("openai/gpt-oss"):
+        return {"reasoning_effort": "low"}
+    return {}
+
+
 def build_llm(max_tokens: int | None = None, fast: bool = False):
-    """Deterministic model on Groq with reasoning disabled, explicit output cap."""
+    """Deterministic model on Groq with reasoning off where supported, explicit output cap."""
     from langchain_groq import ChatGroq
 
     config.require_api_key()
+    model = model_name(fast)
     kwargs = dict(
-        model=config.GROQ_MODEL_FAST if fast else config.GROQ_MODEL,
+        model=model,
         temperature=config.TEMPERATURE,
         max_tokens=max_tokens or config.MAX_TOKENS,
         api_key=config.GROQ_API_KEY,
         max_retries=2,
     )
+    extra = _reasoning_kwargs(model)
+    if not extra:
+        return ChatGroq(**kwargs)
     try:
-        return ChatGroq(reasoning_effort=config.REASONING_EFFORT, **kwargs)
+        return ChatGroq(**extra, **kwargs)
     except TypeError:
-        return ChatGroq(model_kwargs={"reasoning_effort": config.REASONING_EFFORT}, **kwargs)
+        return ChatGroq(model_kwargs=extra, **kwargs)
 
 
 def _strip_thinking(text: str) -> str:
