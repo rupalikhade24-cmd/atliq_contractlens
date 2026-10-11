@@ -58,7 +58,8 @@
       "related": [
         "R-02"
       ],
-      "action": "Ask Al Noor for a written waiver under clause 12.4 before signing, or take the GCC work out of scope. Send to counsel (Mehta Rao already has the Al Noor file)."
+      "action": "Ask Al Noor for a written waiver under clause 12.4 before signing, or take the GCC work out of scope. Send to counsel (Mehta Rao already has the Al Noor file).",
+      "client_position": "AtliQ is not able to provide analytics, AI or revenue-management work for hospitality properties in the GCC under this agreement. Please take the GCC properties out of scope, or let us discuss the scope on a call."
     },
     {
       "id": "R-02",
@@ -104,7 +105,8 @@
         }
       },
       "related": [],
-      "action": "Keep the new rate card at or above Crestline's rates, or price the retroactive Crestline credit into the deal before agreeing."
+      "action": "Keep the new rate card at or above Crestline's rates, or price the retroactive Crestline credit into the deal before agreeing.",
+      "client_position": "We are not able to go below our standard rates for these roles. Please use the rates in our rate card."
     },
     {
       "id": "R-04",
@@ -127,7 +129,8 @@
         ]
       },
       "related": [],
-      "action": "Do not warrant sole ownership of PipeKit. Ask counsel whether the Northwind assignment covers the PipeKit core; check whether Northwind will license or re-assign it."
+      "action": "Do not warrant sole ownership of PipeKit. Ask counsel whether the Northwind assignment covers the PipeKit core; check whether Northwind will license or re-assign it.",
+      "client_position": "AtliQ cannot warrant sole ownership of its PipeKit framework. Please limit the ownership warranty to the bespoke deliverables."
     },
     {
       "id": "R-05",
@@ -169,7 +172,8 @@
         ]
       },
       "related": [],
-      "action": "Limit the new partnership to territories outside India and the GCC (e.g. Europe), or end CloudSpan first on 90 days' notice."
+      "action": "Limit the new partnership to territories outside India and the GCC (e.g. Europe), or end CloudSpan first on 90 days' notice.",
+      "client_position": "We propose limiting the partnership territory to regions outside India and the GCC."
     },
     {
       "id": "R-06",

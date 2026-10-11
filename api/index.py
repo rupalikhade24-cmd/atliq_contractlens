@@ -197,6 +197,17 @@ def complete(body: DecideIn):
         raise HTTPException(400, str(e))
 
 
+@app.post("/api/outcome")
+def prepare_outcome(body: DecideIn):
+    """Client email + counsel note from the decisions. Drafted only; the tool never sends it."""
+    _need_ceo(body.who)
+    import outcome
+    try:
+        return outcome.build(body.record, _who(body.who), body.session_id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
 # ------------------------------------------------------------------ register proposals
 
 class ProposeIn(BaseModel):

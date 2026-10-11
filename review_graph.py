@@ -327,6 +327,7 @@ def assemble(state: ReviewState) -> dict:
                   f["rule_id"] in ("PHI-OFFSHORE", "BUNDLE-MISSING", "LIAB-UNLIMITED")) for f in findings)
     brief = {
         "contract_id": tracker.get("contract_id", ""), "doc_id": state.get("doc_id", ""),
+        "counterparty": tracker.get("counterparty", ""), "doc_type": tracker.get("doc_type", ""),
         "verdict": verdict, "counts": counts, "findings": findings,
         "bundle": state.get("bundle", {}), "extracted": state.get("extracted", {}),
         "ai_completed": ai_done and _llm_ready(), "errors": state.get("errors", []),

@@ -14,7 +14,9 @@ import json
 import sys
 
 import config
+import decisions
 import history
+import outcome
 import register
 import rules
 from citations import find_quote
@@ -202,6 +204,43 @@ def repeats() -> None:
     check("every brief carries the repeat check", "history" in b and b["history"]["times_seen"] == 0)
 
 
+def outcome_email() -> None:
+    print("\n--- Outcome email from decisions ---")
+    stem = "2026-09-18_gulf_crown_hotels_msa_draft"
+    b = review_offline(stem)
+    rec = decisions.new_record("C-025", b, "Karandeep")
+    try:
+        outcome.build(rec)
+        gated = False
+    except ValueError:
+        gated = True
+    check("outcome waits until every blocker and high flag has a decision", gated)
+    reg = next(f for f in b["findings"] if f["origin"] == "register")
+    law = next(f for f in b["findings"] if f["rule_id"] == "LAW-FOREIGN")
+    decisions.decide_record(rec, reg["id"], "counsel", "", "Karandeep", "test")
+    decisions.decide_record(rec, law["id"], "accept", "", "Karandeep", "test")
+    o = outcome.build(rec)
+    mail = o["client_email"]
+    check("client email never names another client or its contract",
+          not any(w in mail for w in ("Al Noor", "al_noor", "Seaside", "12.4")), mail)
+    check("counsel note carries the Al Noor conflict with its quote",
+          "Al Noor" in o["counsel_note"] and reg["quote"][:60] in o["counsel_note"])
+    check("accepted flag uses the playbook wording and the draft's own words",
+          "Indian law" not in law["quote"] and "We propose the law of the AtliQ" in mail
+          and law["quote"][:60] in mail.replace("\n", " "))
+    check("blockers come first in the email", mail.index("Must change") < mail.index("We propose"))
+    decisions.decide_record(rec, law["id"], "dismiss", "client's home law is fine here", "Karandeep", "test")
+    check("a dismissed flag is left out of the email", "governed by" not in outcome.build(rec)["client_email"])
+    d = doc("2026-09-10_harrington_health_msa_draft")
+    b = review_offline(d.doc_id)
+    rec = decisions.new_record(d.tracker_id, b, "Karandeep")
+    for f in b["findings"]:
+        decisions.decide_record(rec, f["id"], "accept", "", "Karandeep", "test")
+    mail = outcome.build(rec)["client_email"]
+    check("AtliQ's own subcontractor and intercompany BAAs stay out of the client email",
+          "Daniel Ortiz" not in mail and "Pune" not in mail and "CareBridge" not in mail, mail)
+
+
 def live() -> None:
     print("\n--- Live AI checks (Groq) ---")
     if not config.GROQ_API_KEY:
@@ -226,6 +265,7 @@ def main() -> None:
     scenario_only_looks_risky()
     guardrails()
     repeats()
+    outcome_email()
     if "--live" in sys.argv:
         live()
     print(f"\n{len(PASS)} passed, {len(FAIL)} failed")

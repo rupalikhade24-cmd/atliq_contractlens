@@ -19,5 +19,27 @@
     "UNFAIR-TO-COUNTERPARTY": {"severity": "high",    "side": "buyer",    "label": "AtliQ's own paper is unfair to a small vendor or freelancer", "standard": "Give vendors and freelancers what AtliQ asks for itself: capped liability, 30-day payment, no daily penalties, pay for work done.", "precedent": "PixelCraft Oct 2025: K removed the 1%/day penalty, set 30-day payment, capped liability for both sides."},
     "OTHER":                  {"severity": "low",     "side": "any",      "label": "Other point worth a look",                          "standard": "", "precedent": ""},
     "ONLY-LOOKS-RISKY":       {"severity": "info",    "side": "any",      "label": "Looks risky, is within standard",                   "standard": "", "precedent": ""}
+  },
+  "client_positions": {
+    "_note": "What AtliQ asks the other side for, in Karandeep's words. Used word for word in the outcome email (outcome.py). A rule with no line here goes only into the internal note. {item} is the part of the flag title after the colon.",
+    "LD-UNCAPPED": "Please cap liquidated damages at 0.5% of the affected milestone fee per week, up to 5% of that milestone fee, with no liquidated damages for delay caused by the client, its contractors or force majeure.",
+    "LD-ABOVE-STANDARD": "Please reduce liquidated damages to 0.5% of the affected milestone fee per week, capped at 5% of that milestone fee.",
+    "LD-NO-CLIENT-DELAY-EXCLUSION": "Please add that no liquidated damages apply to delay caused by the client, its contractors or force majeure.",
+    "LIAB-UNLIMITED": "Please cap each party's aggregate liability at the fees paid in the previous 12 months, with the usual carve-outs.",
+    "LIAB-ABOVE-1X": "We propose capping aggregate liability at the fees paid in the previous 12 months.",
+    "IND-CLIENT-NEGLIGENCE": "Please make the indemnity mutual, so each party covers losses caused by its own breach or negligence and not the other party's.",
+    "IND-ONE-SIDED": "We propose a mutual indemnity, with each party covering its own breach and negligence.",
+    "PAY-SLOW": "We propose payment within 30 days of invoice, and no more than 45 days.",
+    "TERM-NO-WIP-PAYMENT": "Please add that on termination the client pays for all work performed up to that date, including milestones in progress on a pro-rata basis.",
+    "IP-BACKGROUND-ASSIGNED": "Please limit the IP assignment to the bespoke deliverables. AtliQ keeps its pre-existing tools and know-how and grants you a perpetual licence to use them as part of the deliverables.",
+    "INS-ABOVE-COVER": "Please align the insurance requirement with AtliQ's current cyber cover of USD 1 million.",
+    "NDA-NOT-MUTUAL": "Please make the NDA mutual, so that Confidential Information covers what either party discloses to the other.",
+    "NEW-RESTRICTION": "Please narrow this restriction to the specific industry, territory and period it needs to cover, or remove it.",
+    "TERM-ASYMMETRIC": "We propose that either party may terminate for convenience on the same notice period.",
+    "ENTITY-MISMATCH": "Please change the AtliQ party to the AtliQ entity that contracts with clients in your country. We will confirm its exact name and address.",
+    "INVOICE-ENTITY-MISMATCH": "Please make sure invoices are raised by the same AtliQ entity that signs this agreement.",
+    "LAW-FOREIGN": "We propose the law of the AtliQ contracting entity's home country (India for AtliQ Technologies Pvt Ltd, the US for AtliQ Inc), with disputes settled by arbitration in a neutral seat such as Singapore.",
+    "MISSING-ATTACHMENT": "This is referred to as part of the agreement but was not attached. Please send it so we can review it before signing.",
+    "BUNDLE-MISSING": "Before any data is shared, we also need this in place: {item}."
   }
 }

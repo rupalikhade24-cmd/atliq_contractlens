@@ -219,13 +219,42 @@ function showBrief(rec, extra = "") {
     const open = b.findings.filter(f => ["blocker", "high"].includes(f.severity) && !rec.decisions[f.id]).map(f => f.id);
     h += rec.completed ? `<div class="banner b-ok">Review marked complete by ${esc(rec.completed.by)}. Signing stays with Karandeep, outside this tool.</div>`
       : `<div class="row"><button class="btn" id="complete" ${open.length ? "disabled" : ""}>Mark review complete</button>${open.length ? `<span class="small">Decide these before completing: ${esc(open.join(", "))}</span>` : ""}</div>`;
+    h += `<h3>Outcome email</h3><div class="card"><p class="small">One email to ${esc(b.counterparty || "the other side")} built from your decisions: accepted flags become numbered asks in AtliQ's playbook wording, dismissed flags are left out, other clients are never named. Flags sent to counsel also go into an internal note. Nothing is sent from here.</p>
+      <div class="row"><button class="btn" id="outcome" ${open.length ? "disabled" : ""}>Prepare outcome email</button>${open.length ? `<span class="small">Decide ${esc(open.join(", "))} first.</span>` : ""}</div><div id="outcome-out"></div></div>`;
   }
   out.innerHTML = h + extra;
   out.querySelectorAll("[data-act]").forEach(btn => btn.onclick = () => decide(rec, btn.dataset.id, btn.dataset.act));
+  const ob = $("#outcome"); if (ob) ob.onclick = async () => {
+    ob.disabled = true;
+    try { showOutcome(await api("/api/outcome", { who: WHO, session_id: SESSION, record: rec })); }
+    catch (e) { $("#outcome-out").innerHTML = fail(e); }
+    finally { ob.disabled = false; }
+  };
   const cb = $("#complete"); if (cb) cb.onclick = async () => {
     try { const r = await api("/api/complete", { who: WHO, session_id: SESSION, record: rec }); store.set(recKey(r.key), r); showBrief(r); }
     catch (e) { out.insertAdjacentHTML("afterbegin", fail(e)); }
   };
+}
+function showOutcome(o) {
+  const box = $("#outcome-out");
+  box.innerHTML = `<p class="small">${o.points} point(s) in the client email · ${o.counsel_count} for counsel · ${o.internal_count} kept internal. Edit freely before sending.</p>
+    <div class="row"><input type="text" id="o-subj" style="flex:1" value="${esc(o.subject)}"></div>
+    <textarea id="o-mail" rows="16" style="width:100%">${esc(o.client_email)}</textarea>
+    <div class="row"><button class="btn" id="o-copy">Copy email</button><button class="btn alt" id="o-eml">Download as Outlook draft (.eml)</button>
+      <button class="btn alt" id="o-mailto">Open in mail app</button></div>
+    <details class="card" ${o.counsel_count + o.internal_count ? "open" : ""}><summary>Internal note for counsel (not for the client)</summary>
+      <textarea id="o-note" rows="12" style="width:100%">${esc(o.counsel_note)}</textarea>
+      <div class="row"><button class="btn alt" id="o-copy-note">Copy note</button></div></details>`;
+  const copy = async (id, btn) => { try { await navigator.clipboard.writeText($(id).value); btn.textContent = "Copied"; } catch (e) { $(id).select(); } };
+  $("#o-copy").onclick = e => copy("#o-mail", e.target);
+  $("#o-copy-note").onclick = e => copy("#o-note", e.target);
+  $("#o-eml").onclick = () => {
+    const eml = `X-Unsent: 1\r\nSubject: ${$("#o-subj").value}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${$("#o-mail").value.replace(/\n/g, "\r\n")}`;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([eml], { type: "message/rfc822" }));
+    a.download = $("#o-subj").value.replace(/[^\w -]+/g, "").slice(0, 80) + ".eml"; a.click();
+  };
+  $("#o-mailto").onclick = e => { e.preventDefault(); location.href = `mailto:?subject=${encodeURIComponent($("#o-subj").value)}&body=${encodeURIComponent($("#o-mail").value)}`; };
 }
 function finding(f, rec) {
   const open = ["blocker", "high"].includes(f.severity) ? "open" : "";
