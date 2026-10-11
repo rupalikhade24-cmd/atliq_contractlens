@@ -100,8 +100,9 @@ def _doc_facts(d) -> dict:
 def check(text: str, tracker: dict, doc_id: str = "") -> dict:
     """Every earlier copy of this contract in the dataset and tracker, and whether one is signed."""
     me_id = tracker.get("contract_id", "")
-    party = tracker.get("counterparty") or guess_from_filename(re.sub(r"\.\w+$", "", doc_id))["counterparty"]
-    dtype = norm_type(tracker.get("doc_type") or guess_from_filename(re.sub(r"\.\w+$", "", doc_id))["doc_type"])
+    doc_id = re.sub(r"\.(md|txt)$", "", doc_id or "")   # an upload of a dataset file is that file, not a repeat
+    party = tracker.get("counterparty") or guess_from_filename(doc_id)["counterparty"]
+    dtype = norm_type(tracker.get("doc_type") or guess_from_filename(doc_id)["doc_type"])
     mine = _shingles(text)
     matches, seen_ids = [], set()
 
