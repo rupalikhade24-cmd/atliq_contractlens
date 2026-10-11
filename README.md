@@ -115,6 +115,8 @@ in parallel).
 | Finding clauses below AtliQ's standard, explaining collisions | Model, always with a quote |
 | Whether a model finding is shown | Citation check (`citations.py`): quote must be verbatim |
 | Accept / dismiss (with reason) / send to counsel; mark review complete | Karandeep, in the app |
+| Wording of the outcome email | `client_positions` in `data/playbook.json` and `client_position` on register entries (`outcome.py`); the model writes none of it |
+| Sending the outcome email | Karandeep, from his own mail app |
 | Signing | Karandeep, outside the tool |
 
 ### Guardrails
@@ -131,6 +133,13 @@ in parallel).
   clients' terms (the register, the portfolio check, register-flag details) are hidden.
 - **Review completion gate**: "Mark review complete" stays disabled until every blocker and high
   flag has a decision.
+- **Outcome email** (`outcome.py`): after every blocker and high flag has a decision, "Prepare
+  outcome email" builds one numbered email for the other side (accepted flags, blockers first, the
+  draft's own words plus AtliQ's counter-proposal) and an internal note for counsel. Dismissed and
+  info flags are left out, and another client's name or terms never reach the client email. The
+  tool never sends it: Karandeep copies it, downloads an Outlook draft (.eml) or opens his mail app.
+- **Repeat check** (`history.py`): every brief says if the contract was already signed and how many
+  times the same contract came in before (same text, or same client and document type).
 - **Audit log**: `logs/workflow.jsonl` records each step and decision with IDs and counts only.
   No contract text is logged.
 - **"Review not completed"**: if the model call fails, the app says so and shows nothing as
@@ -156,10 +165,12 @@ in parallel).
 | `retriever.py`, `vectorstore.py`, `ingest_contracts.py`, `ingest_all.py` | Chroma RAG: clause-level chunks of signed contracts, drafts and notes |
 | `dataset.py` | Loads the capstone dataset; maps each file to its tracker row; deadlines from notes |
 | `decisions.py` | Saved reviews and human decisions |
+| `outcome.py` | Builds the client email and the counsel note from the decisions |
+| `history.py` | Repeat check: already signed / seen N times before |
 | `workflow_log.py` | Step trace and audit log |
 | `check_setup.py` | Diagnostic |
-| `test_contractlens.py` | The seven capstone scenarios and the guardrails |
-| `data/playbook.json` | Karandeep's positions written down: rule id → severity, standard, precedent |
+| `test_contractlens.py` | The seven capstone scenarios, the guardrails, the repeat check and the outcome email (56 checks) |
+| `data/playbook.json` | Karandeep's positions written down: rule id → severity, standard, precedent; `client_positions` for the outcome email |
 | `data/register_seed.json` | Obligations register with verbatim quotes from the signed contracts |
 
 ## What was added to the dataset
