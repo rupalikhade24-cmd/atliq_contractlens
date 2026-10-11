@@ -99,7 +99,7 @@ def queue(who: str):
     rows = []
     for r in _mine(who):
         d = r["doc"]
-        rows.append({"key": d.tracker_id, "doc_id": d.doc_id, "title": d.title,
+        rows.append({"key": d.tracker_id or d.doc_id, "doc_id": d.doc_id, "title": d.title,
                      "counterparty": d.tracker.get("counterparty"), "doc_type": d.tracker.get("doc_type"),
                      "requested_by": d.tracker.get("requested_by"), "notes": d.tracker.get("notes") or "",
                      "deadline": r["deadline"].isoformat() if r["deadline"] else None,
@@ -149,11 +149,11 @@ def review(body: ReviewIn):
 
     who = _who(body.who)
     if body.key:
-        row = next((r for r in _mine(who) if r["doc"].tracker_id == body.key), None)
+        row = next((r for r in _mine(who) if (r["doc"].tracker_id or r["doc"].doc_id) == body.key), None)
         if not row:
             raise HTTPException(404, "That draft isn't in your queue.")
         d = row["doc"]
-        text, tracker, key, doc_id = d.text, d.tracker, d.tracker_id, d.doc_id
+        text, tracker, key, doc_id = d.text, d.tracker, d.tracker_id or d.doc_id, d.doc_id
     else:
         if not body.text.strip():
             raise HTTPException(400, "Upload a .md or .txt contract.")

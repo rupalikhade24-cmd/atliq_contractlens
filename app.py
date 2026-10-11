@@ -17,6 +17,7 @@ import streamlit as st
 
 import config
 import decisions
+import history
 import register
 import rules
 from chain import answer
@@ -86,10 +87,10 @@ def page_queue() -> None:
     rows = []
     for r in my_rows(incoming_queue()):
         d = r["doc"]
-        saved = decisions.load(d.tracker_id)
+        saved = decisions.load(d.tracker_id or d.doc_id)
         b = saved["brief"] if saved else None
         rows.append({
-            "ID": d.tracker_id, "Counterparty": d.tracker.get("counterparty"), "Type": d.tracker.get("doc_type"),
+            "ID": d.tracker_id or "new file", "Counterparty": d.tracker.get("counterparty"), "Type": d.tracker.get("doc_type"),
             "Requested by": d.tracker.get("requested_by"),
             "Deadline": r["deadline"].strftime("%d %b") if r["deadline"] else "none recorded",
             "Days left": r["days_left"],
@@ -172,6 +173,13 @@ def render_brief(record: dict, key: str) -> None:
         st.caption(f"Citation check removed {b['dropped_count']} AI finding(s) whose quote was not in the contract.")
     if b["recommend_counsel"] and is_ceo:
         st.info("Recommend outside counsel before signing (blocker on a restriction, patient data or liability).")
+    h = b.get("history") or {}
+    if h.get("times_seen"):
+        (st.error if h["already_signed"] else st.warning)("**" + history.summary(h) + "**")
+        st.dataframe(pd.DataFrame([{
+            "Tracker ID": m["contract_id"] or "no tracker row", "Counterparty": m["counterparty"],
+            "Type": m["doc_type"], "Status": m["status"], "Date": m["date"], "Where": m["where"],
+            "Why it matches": m["how"]} for m in h["matches"]]), hide_index=True, use_container_width=True)
     if b["bundle"].get("items"):
         st.subheader(f"Deal documents: {b['bundle']['type']}")
         st.dataframe(pd.DataFrame(b["bundle"]["items"]).rename(
@@ -200,7 +208,7 @@ def render_brief(record: dict, key: str) -> None:
 def page_review() -> None:
     st.header("Review a contract")
     queue = my_rows(incoming_queue())
-    options = {f"{r['doc'].tracker_id} · {r['doc'].title}": r["doc"] for r in queue}
+    options = {f"{r['doc'].tracker_id or 'new file'} · {r['doc'].title}": r["doc"] for r in queue}
     mode = st.radio("Contract", ["From the queue", "Upload a file (.md / .txt)"], horizontal=True)
     if mode == "From the queue":
         if not options:
@@ -208,7 +216,7 @@ def page_review() -> None:
             return
         label = st.selectbox("Draft", list(options))
         d = options[label]
-        text, tracker, key, doc_id = d.text, d.tracker, d.tracker_id, d.doc_id
+        text, tracker, key, doc_id = d.text, d.tracker, d.tracker_id or d.doc_id, d.doc_id
         st.caption(f"Requested by {tracker.get('requested_by')} · tracker note: {tracker.get('notes') or '—'}")
     else:
         up = st.file_uploader("Contract text", type=["md", "txt"])

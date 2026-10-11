@@ -21,6 +21,7 @@ from typing import Annotated, Any, TypedDict
 from langgraph.graph import END, START, StateGraph
 
 import config
+import history
 import register
 import rules
 from chain import call_json, model_name
@@ -331,6 +332,7 @@ def assemble(state: ReviewState) -> dict:
         "ai_completed": ai_done and _llm_ready(), "errors": state.get("errors", []),
         "dropped_count": len(state.get("dropped", [])), "recommend_counsel": counsel,
         "not_checked": not_checked(), "role": rules.atliq_role(tracker),
+        "history": history.check(state["text"], tracker, state.get("doc_id", "")),
         "model": model_name() if _llm_ready() else "",
     }
     step = _trace(state).add("Brief", f"{len(findings)} flags ({counts['blocker']} blocker, "

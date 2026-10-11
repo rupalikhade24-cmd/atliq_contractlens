@@ -14,10 +14,11 @@ import json
 import sys
 
 import config
+import history
 import register
 import rules
 from citations import find_quote
-from dataset import get_doc, load_docs
+from dataset import get_doc, load_docs, load_tracker
 from review_graph import run_review
 
 PASS, FAIL = [], []
@@ -179,6 +180,28 @@ def guardrails() -> None:
         check(f"answers: {q!r}", not rules.guardrail(q))
 
 
+def repeats() -> None:
+    print("\n--- Same contract seen before / already signed ---")
+    d = doc("2025-03-15_al_noor_hospitality_msa")
+    h = history.check(d.text, {"counterparty": "", "doc_type": "MSA", "contract_id": "upload-x"}, "al_noor_copy.md")
+    check("a re-sent copy of a signed contract shows 'Already signed on 2025-03-15'",
+          h["already_signed"] and "2025-03-15" in h["signed_on"] and h["matches"][0]["contract_id"] == "C-007",
+          history.summary(h))
+    h = history.check("unrelated text", {"counterparty": "Al Noor Hospitality Group LLC", "doc_type": "MSA"}, "x.md")
+    check("same client + type is matched by name even when the text differs", h["already_signed"], str(h["matches"]))
+    h = history.check("", dict(load_tracker()["C-010"]), "")
+    check("the duplicate Northwind SOW-1 row (C-010 / C-011) is seen 1 time before",
+          h["times_seen"] == 1 and h["matches"][0]["contract_id"] == "C-011", str(h["matches"]))
+    clean = [x.doc_id for x in load_docs() if x.kind == "incoming"
+             and history.check(x.text, x.tracker, x.doc_id)["times_seen"]]
+    check("no incoming draft in the dataset is wrongly marked as a repeat", not clean, str(clean))
+    check("file name without a tracker row still gives client and type",
+          history.guess_from_filename("2026-10-11_al_noor_hospitality_msa_signed")
+          == {"counterparty": "al noor hospitality", "doc_type": "msa", "date": "2026-10-11"})
+    b = review_offline("2026-09-27_loopmart_mutual_nda_draft")
+    check("every brief carries the repeat check", "history" in b and b["history"]["times_seen"] == 0)
+
+
 def live() -> None:
     print("\n--- Live AI checks (Groq) ---")
     if not config.GROQ_API_KEY:
@@ -202,6 +225,7 @@ def main() -> None:
     scenario_bundle()
     scenario_only_looks_risky()
     guardrails()
+    repeats()
     if "--live" in sys.argv:
         live()
     print(f"\n{len(PASS)} passed, {len(FAIL)} failed")

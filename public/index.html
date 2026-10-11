@@ -203,6 +203,13 @@ function showBrief(rec, extra = "") {
   if (!b.ai_completed) h += `<div class="banner b-warn"><b>AI review not completed.</b> Rule and register checks below are complete; the AI clause scan did not run, so no clause is shown as checked by it. ${(b.errors || []).map(e => `<br><span class="small">• ${esc(e)}</span>`).join("")}</div>`;
   if (b.dropped_count) h += `<p class="small">Citation check removed ${b.dropped_count} AI finding(s) whose quote was not in the contract.</p>`;
   if (b.recommend_counsel && isCeo()) h += `<div class="banner b-info">Recommend outside counsel before signing (blocker on a restriction, patient data or liability).</div>`;
+  const hist = b.history;
+  if (hist && hist.times_seen) {
+    const sum = (hist.already_signed ? `Already signed${hist.signed_on.length ? " on " + hist.signed_on.join(", ") : ""}. ` : "") + `Seen ${hist.times_seen} time${hist.times_seen === 1 ? "" : "s"} before.`;
+    h += `<div class="banner ${hist.already_signed ? "b-err" : "b-warn"}"><b>${esc(sum)}</b></div>
+      <table><tr><th>Tracker ID</th><th>Counterparty</th><th>Type</th><th>Status</th><th>Date</th><th>Where</th><th>Why it matches</th></tr>${hist.matches.map(x =>
+      `<tr><td>${esc(x.contract_id || "no tracker row")}</td><td>${esc(x.counterparty)}</td><td>${esc(x.doc_type)}</td><td>${esc(x.status)}</td><td>${esc(x.date)}</td><td>${esc(x.where)}</td><td>${esc(x.how)}</td></tr>`).join("")}</table>`;
+  }
   if (b.bundle && b.bundle.items && b.bundle.items.length)
     h += `<h3>Deal documents: ${esc(b.bundle.type)}</h3><table><tr><th>Document</th><th>Status</th><th>Tracker / note</th></tr>${b.bundle.items.map(i =>
       `<tr><td>${esc(i.doc)}</td><td>${i.status === "Missing" ? "<b style='color:var(--blocker)'>Missing</b>" : esc(i.status)}</td><td>${esc(i.tracker_id)}</td></tr>`).join("")}</table>`;
