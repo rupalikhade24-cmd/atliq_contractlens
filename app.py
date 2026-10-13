@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date
+from urllib.parse import quote
 
 import pandas as pd
 import streamlit as st
@@ -204,10 +205,10 @@ def render_brief(record: dict, key: str) -> None:
             st.rerun()
         if remaining:
             st.caption("Decide these before completing: " + ", ".join(remaining))
-        st.subheader("Outcome email")
+        st.subheader("Outcome brief (email or WhatsApp)")
         st.caption("One email built from your decisions: accepted flags become numbered asks in AtliQ's playbook "
                    "wording, dismissed flags are left out, other clients are never named. Nothing is sent from here.")
-        if st.button("Prepare outcome email", disabled=bool(remaining), key=f"o-{key}"):
+        if st.button("Prepare outcome brief", disabled=bool(remaining), key=f"o-{key}"):
             st.session_state[f"outcome-{key}"] = outcome.build(record, me, st.session_state.session_id)
         o = st.session_state.get(f"outcome-{key}")
         if o:
@@ -218,6 +219,9 @@ def render_brief(record: dict, key: str) -> None:
             st.download_button("Download as Outlook draft (.eml)", file_name="outcome.eml", mime="message/rfc822",
                                data=f"X-Unsent: 1\r\nSubject: {o['subject']}\r\nContent-Type: text/plain; "
                                     f"charset=utf-8\r\n\r\n" + o["client_email"].replace("\n", "\r\n"))
+            st.caption("WhatsApp version (bold headings):")
+            st.code(o["whatsapp"], language=None)
+            st.link_button("Share on WhatsApp", "https://wa.me/?text=" + quote(o["whatsapp"]))
             with st.expander("Internal note for counsel (not for the client)"):
                 st.code(o["counsel_note"], language=None)
 

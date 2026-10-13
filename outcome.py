@@ -1,4 +1,4 @@
-"""Turn a decided review into the email Karandeep sends, plus an internal note for counsel.
+"""Turn a decided review into the email (or WhatsApp message) Karandeep sends, plus an internal note for counsel.
 
 Deterministic: every sentence is either the draft's own words (already citation-checked) or a
 counter-proposal written in the playbook / register. The model writes nothing here, and other
@@ -134,7 +134,9 @@ def build(record: dict, by: str = "Karandeep", session_id: str = "outcome") -> d
             for f in left_out))
     Trace(session_id, record.get("key", "")).add(
         "Outcome prepared", f"by {by}: {n} points in client email, {len(counsel)} for counsel")
-    return {"subject": subject, "client_email": "\n".join(body),
+    headings = {h for _, h in GROUPS}
+    wa = [f"*{subject}*", ""] + [f"*{l}*" if l in headings else l for l in body]
+    return {"subject": subject, "client_email": "\n".join(body), "whatsapp": "\n".join(wa),
             "counsel_note": "\n".join(note).strip(), "points": n,
             "counsel_count": len(counsel), "internal_count": len(internal)}
 

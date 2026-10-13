@@ -219,8 +219,8 @@ function showBrief(rec, extra = "") {
     const open = b.findings.filter(f => ["blocker", "high"].includes(f.severity) && !rec.decisions[f.id]).map(f => f.id);
     h += rec.completed ? `<div class="banner b-ok">Review marked complete by ${esc(rec.completed.by)}. Signing stays with Karandeep, outside this tool.</div>`
       : `<div class="row"><button class="btn" id="complete" ${open.length ? "disabled" : ""}>Mark review complete</button>${open.length ? `<span class="small">Decide these before completing: ${esc(open.join(", "))}</span>` : ""}</div>`;
-    h += `<h3>Outcome email</h3><div class="card"><p class="small">One email to ${esc(b.counterparty || "the other side")} built from your decisions: accepted flags become numbered asks in AtliQ's playbook wording, dismissed flags are left out, other clients are never named. Flags sent to counsel also go into an internal note. Nothing is sent from here.</p>
-      <div class="row"><button class="btn" id="outcome" ${open.length ? "disabled" : ""}>Prepare outcome email</button>${open.length ? `<span class="small">Decide ${esc(open.join(", "))} first.</span>` : ""}</div><div id="outcome-out"></div></div>`;
+    h += `<h3>Outcome brief</h3><div class="card"><p class="small">One message to ${esc(b.counterparty || "the other side")} built from your decisions: accepted flags become numbered asks in AtliQ's playbook wording, dismissed flags are left out, other clients are never named. Flags sent to counsel also go into an internal note. Send it by email or WhatsApp; nothing is sent from here.</p>
+      <div class="row"><button class="btn" id="outcome" ${open.length ? "disabled" : ""}>Prepare outcome brief</button>${open.length ? `<span class="small">Decide ${esc(open.join(", "))} first.</span>` : ""}</div><div id="outcome-out"></div></div>`;
   }
   out.innerHTML = h + extra;
   out.querySelectorAll("[data-act]").forEach(btn => btn.onclick = () => decide(rec, btn.dataset.id, btn.dataset.act));
@@ -242,6 +242,8 @@ function showOutcome(o) {
     <textarea id="o-mail" rows="16" style="width:100%">${esc(o.client_email)}</textarea>
     <div class="row"><button class="btn" id="o-copy">Copy email</button><button class="btn alt" id="o-eml">Download as Outlook draft (.eml)</button>
       <button class="btn alt" id="o-mailto">Open in mail app</button></div>
+    <div class="row"><button class="btn" id="o-wa-copy">Copy for WhatsApp</button><button class="btn alt" id="o-wa">Share on WhatsApp</button>
+      <span class="small">Same points, with WhatsApp bold headings. Uses your edits above.</span></div>
     <details class="card" ${o.counsel_count + o.internal_count ? "open" : ""}><summary>Internal note for counsel (not for the client)</summary>
       <textarea id="o-note" rows="12" style="width:100%">${esc(o.counsel_note)}</textarea>
       <div class="row"><button class="btn alt" id="o-copy-note">Copy note</button></div></details>`;
@@ -254,6 +256,13 @@ function showOutcome(o) {
     a.href = URL.createObjectURL(new Blob([eml], { type: "message/rfc822" }));
     a.download = $("#o-subj").value.replace(/[^\w -]+/g, "").slice(0, 80) + ".eml"; a.click();
   };
+  const waText = () => {
+    const heads = ["Must change before we can sign", "We need these changed", "We propose", "Smaller points"];
+    const body = $("#o-mail").value.split("\n").map(l => heads.includes(l.trim()) ? `*${l.trim()}*` : l).join("\n");
+    return `*${$("#o-subj").value}*\n\n${body}`;
+  };
+  $("#o-wa-copy").onclick = async e => { try { await navigator.clipboard.writeText(waText()); e.target.textContent = "Copied"; } catch (err) { $("#o-mail").select(); } };
+  $("#o-wa").onclick = () => window.open(`https://wa.me/?text=${encodeURIComponent(waText())}`, "_blank", "noopener");
   $("#o-mailto").onclick = e => { e.preventDefault(); location.href = `mailto:?subject=${encodeURIComponent($("#o-subj").value)}&body=${encodeURIComponent($("#o-mail").value)}`; };
 }
 function finding(f, rec) {

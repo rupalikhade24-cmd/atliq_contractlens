@@ -229,6 +229,10 @@ def outcome_email() -> None:
           "Indian law" not in law["quote"] and "We propose the law of the AtliQ" in mail
           and law["quote"][:60] in mail.replace("\n", " "))
     check("blockers come first in the email", mail.index("Must change") < mail.index("We propose"))
+    wa = o["whatsapp"]
+    check("WhatsApp version has the same points with bold headings and no other client",
+          "*Must change before we can sign*" in wa and "*We propose*" in wa and o["subject"] in wa
+          and law["quote"][:60] in wa.replace("\n", " ") and "Al Noor" not in wa, wa)
     decisions.decide_record(rec, law["id"], "dismiss", "client's home law is fine here", "Karandeep", "test")
     check("a dismissed flag is left out of the email", "governed by" not in outcome.build(rec)["client_email"])
     d = doc("2026-09-10_harrington_health_msa_draft")
